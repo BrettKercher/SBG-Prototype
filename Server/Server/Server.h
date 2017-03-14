@@ -19,6 +19,9 @@ public:
 	void OnMessageReceived(connection_hdl inHandle, WSServer::message_ptr inMessage);
 	void Run(uint16_t port);
 
+	void ProcessBinaryMessage(connection_hdl inFromConnection, WSServer::message_ptr inMessage);
+	void ProcessTextMessage(connection_hdl inFromConnection, WSServer::message_ptr inMessage);
+
 private:
 	WSServer mServer;
 	std::map<connection_hdl, PlayerSessionPtr, std::owner_less<connection_hdl>> mPlayers;

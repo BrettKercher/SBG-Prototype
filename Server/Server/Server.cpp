@@ -40,8 +40,22 @@ void Server::OnClose(connection_hdl inHandle)
 
 void Server::OnMessageReceived(connection_hdl inHandle, WSServer::message_ptr inMessage)
 {
-	std::cout << "Received message from client: " << std::endl;
+	if (inMessage->get_opcode() == websocketpp::frame::opcode::binary)
+	{
+		ProcessBinaryMessage(inHandle, inMessage);
+	}
+	else if (inMessage->get_opcode() == websocketpp::frame::opcode::text)
+	{
+		ProcessTextMessage(inHandle, inMessage);
+	}
+	else
+	{
+		std::cout << "Invalid message type received from client connection " << inHandle << std::endl;
+	}
+}
 
+void Server::ProcessBinaryMessage(connection_hdl inFromConnection, WSServer::message_ptr inMessage)
+{
 	void* byteArray = (void*)(inMessage->get_payload().data());
 	int x = ((int*)byteArray)[0];
 	int y = ((int*)byteArray)[1];
@@ -50,6 +64,11 @@ void Server::OnMessageReceived(connection_hdl inHandle, WSServer::message_ptr in
 	{
 		mServer.send(player.first, inMessage->get_payload(), websocketpp::frame::opcode::binary);
 	}
+}
+
+void Server::ProcessTextMessage(connection_hdl inFromConnection, WSServer::message_ptr inMessage)
+{
+
 }
 
 int main()
