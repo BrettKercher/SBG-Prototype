@@ -9,8 +9,8 @@ class PlayerSession
 private:
 	typedef struct
 	{
-		int xPos;
-		int yPos;
+		int xPos = 7;
+		int yPos = 1;
 	} Data;
 
 public:

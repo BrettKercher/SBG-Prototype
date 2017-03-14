@@ -9,14 +9,6 @@
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 
-struct Message
-{
-	byte num1;
-	byte num2;
-	int num3;
-};
-
-
 Server::Server()
 {
 	mServer.init_asio();
@@ -36,6 +28,9 @@ void Server::OnOpen(connection_hdl inHandle)
 {
 	PlayerSessionPtr newPlayer(new PlayerSession(inHandle));
 	mPlayers[inHandle] = newPlayer;
+
+	mServer.send(inHandle, &(newPlayer->GetReplicatedAttributes()), sizeof(newPlayer->GetReplicatedAttributes()), websocketpp::frame::opcode::binary);
+	//mServer.send(inHandle,"this is a string", websocketpp::frame::opcode::text);
 }
 
 void Server::OnClose(connection_hdl inHandle)
@@ -45,11 +40,15 @@ void Server::OnClose(connection_hdl inHandle)
 
 void Server::OnMessageReceived(connection_hdl inHandle, WSServer::message_ptr inMessage)
 {
-	std::cout << "Received message from client" << std::endl;
+	std::cout << "Received message from client: " << std::endl;
+
+	void* byteArray = (void*)(inMessage->get_payload().data());
+	int x = ((int*)byteArray)[0];
+	int y = ((int*)byteArray)[1];
 
 	for (auto player : mPlayers)
 	{
-		mServer.send(player.first, &(player.second->GetReplicatedAttributes()), sizeof(player.second->GetReplicatedAttributes()), websocketpp::frame::opcode::binary);
+		mServer.send(player.first, inMessage->get_payload(), websocketpp::frame::opcode::binary);
 	}
 }
 
