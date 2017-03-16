@@ -1,11 +1,12 @@
-
-var game = new Phaser.Game(800, 500, Phaser.AUTO, 'phaser', { preload: preload, create: create, update: update});
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser', { preload: preload, create: create, update: update});
 
 var player;
 var otherPlayers = {};
 
 function preload() {
-    this.load.image('player', '/assets/ball.png');
+    this.load.image('player', '/assets/knight.png');
+    this.load.image('platform_side', 'assets/platform_side.png');
+    this.load.image('platform_bottom', 'assets/platform_bottom.png');
 }
 
 function create() {
@@ -13,10 +14,30 @@ function create() {
     this.client = new Client();
     this.client.openConnection();
 
-    player = this.add.sprite(0,0,'player');
+    game.stage.backgroundColor = "#FFFFFF";
+
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    player = this.add.sprite(game.world.centerX,game.world.centerY,'player');
+    player.anchor.setTo(0.5,0.5);
     this.physics.arcade.enableBody(player);
     player.body.collideWorldBounds = true;
     this.cursors = this.input.keyboard.createCursorKeys();
+
+
+    platforms = game.add.group();
+    platforms.enableBody = true;
+    var bottom = platforms.create(200,100, 'platform_bottom');
+    bottom.body.immovable = true;
+    bottom = platforms.create(200,468, 'platform_bottom');
+    bottom.body.immovable = true;
+    var side = platforms.create(200,100, 'platform_side');
+    side.body.immovable = true;
+    side = platforms.create(570,100, 'platform_side');
+    side.body.immovable = true;
+
+
+
 }
 
 function update() {
@@ -26,25 +47,32 @@ function update() {
 
     var moveSpeed = 250;
 
+    var hitPlatform = game.physics.arcade.collide(player, platforms);
+    
     if(this.cursors.left.isDown)
     {
         hSpeed -= 1;
+        player.angle = 90;
     }
 
     if(this.cursors.right.isDown)
     {
         hSpeed += 1;
+        player.angle =270;
     }
 
     if(this.cursors.up.isDown)
     {
         vSpeed -= 1;
+        player.angle =180;
     }
 
     if(this.cursors.down.isDown)
     {
         vSpeed += 1;
+        player.angle =360;
     }
+
     player.body.velocity.x = hSpeed * moveSpeed;
     player.body.velocity.y = vSpeed * moveSpeed;
 
