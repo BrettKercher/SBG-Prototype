@@ -27,6 +27,7 @@ b.exports=c,c.getUnvisitedNode=function(a){for(var b=a.length,c=0;c!==b;c++){var
 var game = new Phaser.Game(800, 500, Phaser.AUTO, 'phaser', { preload: preload, create: create, update: update});
 
 var player;
+var otherPlayers = {};
 
 function preload() {
     this.load.image('player', '/assets/ball.png');
@@ -105,9 +106,32 @@ Client.prototype.connectionOpen = function() {
 };
 
 Client.prototype.onMessage = function(message) {
-    var xBuffer = new Int32Array(message.data, 0, 1);
-    var yBuffer = new Int32Array(message.data, 4, 1);
-    console.log(xBuffer + " " + yBuffer);
+    if(typeof message.data == 'string')
+    {
+        //text message (connections)
+        var text = message.data;
+        if(text.startsWith('current_connections'))
+        {
+            text = text.slice('current_connections'.length + 1);
+            console.log(text);
+        }
+        else if(text.startsWith('player_id'))
+        {
+            text = text.slice('player_id'.length + 1);
+            player.id = text;
+        }
+        else if(text.startsWith('new_connection'))
+        {
+            text = text.slice('new_connection'.length + 1);
+            console.log(text);
+        }
+    }
+    else
+    {
+        //binary message (position updates)
+        var xBuffer = new Int32Array(message.data, 0, 1);
+        var yBuffer = new Int32Array(message.data, 4, 1);
+    }
 };
 
 Client.prototype.displayError = function(err) {

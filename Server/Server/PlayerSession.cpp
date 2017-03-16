@@ -2,9 +2,10 @@
 
 
 
-PlayerSession::PlayerSession(connection_hdl inConnection)
+PlayerSession::PlayerSession(connection_hdl inConnection, int inPlayerId)
 	: mConnection(inConnection)
 {
+	attrs.id = inPlayerId;
 }
 
 connection_hdl PlayerSession::GetConnectionHandle()

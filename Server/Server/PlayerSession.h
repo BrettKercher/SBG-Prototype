@@ -9,12 +9,13 @@ class PlayerSession
 private:
 	typedef struct
 	{
-		int xPos = 7;
-		int yPos = 1;
+		int id = 0;
+		int xPos = 0;
+		int yPos = 0;
 	} Data;
 
 public:
-	PlayerSession(connection_hdl inConnection);
+	PlayerSession(connection_hdl inConnection, int inPlayerId);
 	connection_hdl GetConnectionHandle();
 	Data GetReplicatedAttributes();
 
