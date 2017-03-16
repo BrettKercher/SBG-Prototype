@@ -49,29 +49,56 @@ function update() {
 
     var hitPlatform = game.physics.arcade.collide(player, platforms);
     
-    if(this.cursors.left.isDown)
+    if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
     {
         hSpeed -= 1;
         player.angle = 90;
     }
 
-    if(this.cursors.right.isDown)
+    if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
     {
         hSpeed += 1;
-        player.angle =270;
+        player.angle = -90;
     }
 
-    if(this.cursors.up.isDown)
+    if(game.input.keyboard.isDown(Phaser.Keyboard.UP))
     {
         vSpeed -= 1;
-        player.angle =180;
+        player.angle = -180;
     }
 
-    if(this.cursors.down.isDown)
+    if(game.input.keyboard.isDown(Phaser.Keyboard.DOWN))
     {
         vSpeed += 1;
-        player.angle =360;
+        player.angle = 0;
+
     }
+
+    //Dash?
+    if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
+    {
+       console.error(player.angle);
+
+        switch(player.angle)
+        {
+            case 0:
+                player.position.y+= 5;
+                break;
+            case -90:
+                player.position.x+= 5;
+                break;
+            case -180:
+                player.position.y-= 5;
+                break;
+            case 90:
+                player.position.x-= 5;
+
+        }
+
+
+
+    }
+
 
     player.body.velocity.x = hSpeed * moveSpeed;
     player.body.velocity.y = vSpeed * moveSpeed;
