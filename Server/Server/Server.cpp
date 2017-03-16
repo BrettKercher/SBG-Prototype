@@ -5,9 +5,24 @@
 #include "Server.h"
 
 #include <string.h>
+#include "PlayerSession.h"
+#include "Packet.h"
 
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
+
+void NewSessionPacket::Write(Buffer& inBuffer)
+{
+	inBuffer.WriteInt(assignedId);
+	inBuffer.WriteInt(connectedPlayers);
+}
+
+void NewSessionPacket::Read(Buffer& inBuffer)
+{
+	//The server should never have to read a NewSessionPacket, but it's here for completion's sake
+	assignedId = inBuffer.ReadInt();
+	connectedPlayers = inBuffer.ReadInt();
+}
 
 Server::Server()
 {
@@ -33,8 +48,14 @@ void Server::OnOpen(connection_hdl inHandle)
 {
 	static int playerId = 0;
 
-	mServer.send(inHandle, "current_connections:" + std::to_string(mPlayers.size()), websocketpp::frame::opcode::text);
-	mServer.send(inHandle, "player_id:" + std::to_string(playerId), websocketpp::frame::opcode::text);
+	NewSessionPacket packet;
+	packet.assignedId = playerId;
+	packet.connectedPlayers = mPlayers.size();
+
+	Buffer buffer(sizeof(NewSessionPacket));
+	packet.Write(buffer);
+
+	mServer.send(inHandle, buffer.data, buffer.size, websocketpp::frame::opcode::binary);
 
 	PlayerSessionPtr newPlayer(new PlayerSession(inHandle, playerId));
 	mPlayers[inHandle] = newPlayer;

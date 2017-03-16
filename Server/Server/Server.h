@@ -3,12 +3,21 @@
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include <map>
-#include "PlayerSession.h"
 
 typedef websocketpp::server<websocketpp::config::asio> WSServer;
 using websocketpp::connection_hdl;
 
 class PlayerSession;
+class Buffer;
+typedef std::shared_ptr<PlayerSession> PlayerSessionPtr;
+
+struct NewSessionPacket
+{
+	int assignedId;
+	int connectedPlayers;
+	void Write(Buffer& inBuffer);
+	void Read(Buffer& inBuffer);
+};
 
 class Server
 {
