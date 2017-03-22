@@ -14,7 +14,15 @@ typedef std::shared_ptr<PlayerSession> PlayerSessionPtr;
 struct NewSessionPacket
 {
 	int assignedId;
-	int connectedPlayers;
+	int numPlayers;
+	std::vector<int> connectedPlayerIds;
+	void Write(Buffer& inBuffer);
+	void Read(Buffer& inBuffer);
+};
+
+struct PlayerJoinPacket
+{
+	int playerId;
 	void Write(Buffer& inBuffer);
 	void Read(Buffer& inBuffer);
 };

@@ -102,8 +102,6 @@ function update() {
     //Dash?
     if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
     {
-       console.error(player.angle);
-
         switch(player.angle)
         {
             case 0:
@@ -117,20 +115,15 @@ function update() {
                 break;
             case 90:
                 player.position.x-= 5;
-
         }
-
-
-
     }
-
 
     player.body.velocity.x = hSpeed * moveSpeed;
     player.body.velocity.y = vSpeed * moveSpeed;
 
     if(this.client.connected)
     {
-        this.client.sendMessage(player.body.position);
+        //this.client.sendMessage(player.body.position);
     }
 }
 
@@ -163,30 +156,45 @@ Client.prototype.connectionOpen = function() {
 Client.prototype.onMessage = function(message) {
     if(typeof message.data == 'string')
     {
-        //text message (connections)
-        var text = message.data;
-        if(text.startsWith('current_connections'))
-        {
-            text = text.slice('current_connections'.length + 1);
-            otherPlayers
-        }
-        else if(text.startsWith('player_id'))
-        {
-            text = text.slice('player_id'.length + 1);
-            player.id = text;
-        }
-        else if(text.startsWith('new_connection'))
-        {
-            text = text.slice('new_connection'.length + 1);
-            console.log(text);
-        }
+        this.processTextMessage(message.data);
     }
     else
     {
-        //binary message (position updates)
-        var xBuffer = new Int32Array(message.data, 0, 1);
-        var yBuffer = new Int32Array(message.data, 4, 1);
+        this.processBinaryMessage(message.data);
     }
+};
+
+Client.prototype.processTextMessage = function(msg) {
+    console.log('[TEXT PACKET RECEIVED]');
+};
+
+Client.prototype.processBinaryMessage = function(msg) {
+    console.log('[BINARY PACKET RECEIVED]');
+    var data = new DataView(msg, 0);
+    var packetType = data.getInt8();
+
+    console.log(data.getInt8(0));
+    console.log(data.getInt8(1));
+    console.log(data.getInt8(2));
+    console.log(data.getInt8(3));
+    console.log(data.getInt8(4));
+    console.log('--------------');
+    console.log(data.getInt8(5));
+    console.log(data.getInt8(6));
+    console.log(data.getInt8(7));
+    console.log(data.getInt8(8));
+
+    if(packetType == 0)
+    {
+        var assignedId = data.getUint32(1);
+        var numOtherPlayers = data.getUint32(5);
+        //console.log('Assigned ID: ' + assignedId);
+        //console.log('Other Players: ' + numOtherPlayers);
+    }
+
+    //var xBuffer = new Int32Array(message.data, 0, 1);
+    //var yBuffer = new Int32Array(message.data, 4, 1);
+
 };
 
 Client.prototype.displayError = function(err) {
