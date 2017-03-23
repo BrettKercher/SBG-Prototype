@@ -26,6 +26,8 @@ void NewSessionPacket::Write(Buffer& inBuffer)
 
 void NewSessionPacket::Read(Buffer& inBuffer)
 {
+	//assignedId = inBuffer.ReadInt();
+	//numPlayers = inBuffer.ReadInt();
 	assert(false);	//Should never have to read a NewSessionPacket
 }
 
@@ -70,7 +72,7 @@ void Server::Run(uint16_t port)
 
 void Server::OnOpen(connection_hdl inHandle)
 {
-	static int playerId = 0;
+	static uint32_t playerId = 0;
 
 	NewSessionPacket sessionPacket;
 	sessionPacket.assignedId = playerId;
@@ -78,17 +80,15 @@ void Server::OnOpen(connection_hdl inHandle)
 
 	Buffer joinBuffer(sizeof(PlayerJoinPacket) + 1);
 	PlayerJoinPacket joinPacket;
-	int id = 0;
+	uint32_t id = 0;
 	for (auto player : mPlayers)
 	{
-		id = (player.second)->GetReplicatedAttributes().id;
-
-		joinPacket.playerId = id;
+		joinPacket.playerId = playerId;
 		joinPacket.Write(joinBuffer);
 		mServer.send(player.first, joinBuffer.Data(), joinBuffer.Length(), websocketpp::frame::opcode::binary);
 		joinBuffer.Clear();
 
-		sessionPacket.connectedPlayerIds.push_back(id);
+		sessionPacket.connectedPlayerIds.push_back((player.second)->GetReplicatedAttributes().id);
 	}
 
 	Buffer sessionBuffer(sizeof(sessionPacket.assignedId) + sizeof(sessionPacket.numPlayers) + (sessionPacket.connectedPlayerIds.size() * 8) + 1);
@@ -127,6 +127,7 @@ void Server::ProcessBinaryMessage(connection_hdl inFromConnection, WSServer::mes
 	// Right now there's only one type of binary message - player position
 	// For now just relay it to all other clients, don't worry about security
 
+
 	for (auto player : mPlayers)
 	{
 		if (player.first.lock().get() == inFromConnection.lock().get())
@@ -137,9 +138,10 @@ void Server::ProcessBinaryMessage(connection_hdl inFromConnection, WSServer::mes
 		mServer.send(player.first, inMessage->get_payload(), websocketpp::frame::opcode::binary);
 	}
 
-	//void* byteArray = (void*)(inMessage->get_payload().data());
-	//int x = ((int*)byteArray)[0];
-	//int y = ((int*)byteArray)[1];
+// 	Buffer playerBuffer(inMessage->get_payload().length(), inMessage->get_payload().data());
+// 	PlayerPacket playerPacket;
+// 	playerBuffer.ReadByte();
+// 	playerPacket.Read(playerBuffer);
 }
 
 void Server::ProcessTextMessage(connection_hdl inFromConnection, WSServer::message_ptr inMessage)

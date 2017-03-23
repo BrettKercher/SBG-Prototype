@@ -8,12 +8,13 @@ class Buffer
 {
 public:
 
-	Buffer(int inSize);
+	Buffer(uint32_t inSize);
+	Buffer(uint32_t inSize, const char* inData);
 	~Buffer();
 
 	uint8_t* Data();
-	int Length();
-	int Index();
+	uint32_t Length();
+	uint32_t Index();
 
 	void WriteInt(uint32_t value);
 	void WriteShort(uint16_t value);
@@ -27,7 +28,7 @@ public:
 
 private:
 	uint8_t* mData;
-	int mSize;
-	int mIndex;
+	uint32_t mSize;
+	uint32_t mIndex;
 
 };

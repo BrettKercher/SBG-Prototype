@@ -96,9 +96,9 @@ function update() {
     player.body.velocity.x = hSpeed * moveSpeed;
     player.body.velocity.y = vSpeed * moveSpeed;
 
-    if(this.client.connected)
+    if(this.client.connected && (player.netId !== null || player.netId !== undefined))
     {
-        //this.client.sendMessage(player.body.position);
+        this.client.sendMessage(player.netId, player.body.position);
     }
 }
 
@@ -113,63 +113,71 @@ Client.prototype.openConnection = function() {
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = this.displayError.bind(this);
     this.ws.onopen = this.connectionOpen.bind(this);
+    this.ws.onclose = this.connectionClose.bind(this);
 };
 
-Client.prototype.sendMessage = function(payload) {
+Client.prototype.connectionClose = function() {
+    this.connected = false;
+};
 
-    var buffer = new Uint32Array(2);
-    buffer[0] = payload.x;
-    buffer[1] = payload.y;
-    this.ws.send(buffer);
+Client.prototype.sendMessage = function(playerId, payload) {
+
+    var data = new DataView(new ArrayBuffer(13), 0);
+    data.setUint8(0, 3, true);    //Set packet id to 3
+    data.setUint32(1, playerId, true);
+    data.setUint32(5, payload.x, true);
+    data.setUint32(9, payload.y, true);
+    this.ws.send(data.buffer);
 };
 
 Client.prototype.connectionOpen = function() {
     this.connected = true;
-    this.sendMessage(player.body.position);
+    //this.sendMessage(player.body.position);
 };
 
 Client.prototype.onMessage = function(message) {
-    if(typeof message.data == 'string')
-    {
+    if(typeof message.data == 'string') {
         this.processTextMessage(message.data);
     }
-    else
-    {
+    else {
         this.processBinaryMessage(message.data);
     }
 };
 
 Client.prototype.processTextMessage = function(msg) {
-    console.log('[TEXT PACKET RECEIVED]');
 };
 
 Client.prototype.processBinaryMessage = function(msg) {
-    console.log('[BINARY PACKET RECEIVED]');
     var data = new DataView(msg, 0);
     var packetType = data.getInt8();
 
-    console.log(data.getInt8(0));
-    console.log(data.getInt8(1));
-    console.log(data.getInt8(2));
-    console.log(data.getInt8(3));
-    console.log(data.getInt8(4));
-    console.log('--------------');
-    console.log(data.getInt8(5));
-    console.log(data.getInt8(6));
-    console.log(data.getInt8(7));
-    console.log(data.getInt8(8));
+    if(packetType == 0) {
+        //First joined packet
+        var assignedId = data.getUint32(1, true);
+        var numOtherPlayers = data.getUint32(5, true);
+        var otherPlayerId = 0;
 
-    if(packetType == 0)
-    {
-        var assignedId = data.getUint32(1);
-        var numOtherPlayers = data.getUint32(5);
-        //console.log('Assigned ID: ' + assignedId);
-        //console.log('Other Players: ' + numOtherPlayers);
+        player.netId = assignedId;
+
+        for(var i = 0; i < numOtherPlayers; i++) {
+            otherPlayerId = data.getUint32(9 + (i*4), true);
+            otherPlayers[otherPlayerId] = game.add.sprite(0,0,'player');
+        }
     }
+    else if(packetType == 1) {
+        //New player joined packet
+        var newPlayerId = data.getUint32(1, true);
+        otherPlayers[newPlayerId] = game.add.sprite(0,0,'player');
+    }
+    else if(packetType == 3) {
+        //Player state packet
+        var playerId = data.getUint32(1, true);
+        var playerX = data.getUint32(5, true);
+        var playerY = data.getUint32(9, true);
 
-    //var xBuffer = new Int32Array(message.data, 0, 1);
-    //var yBuffer = new Int32Array(message.data, 4, 1);
-
+        otherPlayers[playerId].position.x = playerX;
+        otherPlayers[playerId].position.y = playerY;
+    }
 };
 
 Client.prototype.displayError = function(err) {
