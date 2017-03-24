@@ -107,7 +107,7 @@ function Client() {
 }
 
 Client.prototype.openConnection = function() {
-    this.ws = new WebSocket("ws://127.0.0.1:9001");
+    this.ws = new WebSocket("ws://174.138.68.104:9001");
     this.connected = false;
     this.ws.binaryType = "arraybuffer";
     this.ws.onmessage = this.onMessage.bind(this);
