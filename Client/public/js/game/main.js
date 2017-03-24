@@ -4,9 +4,9 @@ var player;
 var otherPlayers = {};
 
 function preload() {
-    this.load.image('player', '/assets/knight.png');
-    this.load.image('platform_side', 'assets/platform_side.png');
-    this.load.image('platform_bottom', 'assets/platform_bottom.png');
+    this.load.image('player', '/res/knight.png');
+    this.load.image('platform_side', '/res/platform_side.png');
+    this.load.image('platform_bottom', '/res/platform_bottom.png');
 }
 
 function create() {
