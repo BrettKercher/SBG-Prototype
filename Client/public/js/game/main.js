@@ -107,7 +107,8 @@ function Client() {
 }
 
 Client.prototype.openConnection = function() {
-    this.ws = new WebSocket("ws://174.138.68.104:9001");
+    //this.ws = new WebSocket("ws://174.138.68.104:9001");
+    this.ws = new WebSocket("ws://localhost:9001");
     this.connected = false;
     this.ws.binaryType = "arraybuffer";
     this.ws.onmessage = this.onMessage.bind(this);
@@ -132,7 +133,6 @@ Client.prototype.sendMessage = function(playerId, payload) {
 
 Client.prototype.connectionOpen = function() {
     this.connected = true;
-    //this.sendMessage(player.body.position);
 };
 
 Client.prototype.onMessage = function(message) {
@@ -148,8 +148,11 @@ Client.prototype.processTextMessage = function(msg) {
 };
 
 Client.prototype.processBinaryMessage = function(msg) {
+
     var data = new DataView(msg, 0);
-    var packetType = data.getInt8();
+    var packetType = data.getUint8(0, true);
+
+    console.log("packet type: " + packetType);
 
     if(packetType == 0) {
         //First joined packet
@@ -157,16 +160,21 @@ Client.prototype.processBinaryMessage = function(msg) {
         var numOtherPlayers = data.getUint32(5, true);
         var otherPlayerId = 0;
 
+        console.log("Assigned Id: " + assignedId);
+        console.log("Num Other Players: " + numOtherPlayers);
+
         player.netId = assignedId;
 
         for(var i = 0; i < numOtherPlayers; i++) {
             otherPlayerId = data.getUint32(9 + (i*4), true);
+            console.log("Other Player Id: " + otherPlayerId);
             otherPlayers[otherPlayerId] = game.add.sprite(0,0,'player');
         }
     }
     else if(packetType == 1) {
         //New player joined packet
         var newPlayerId = data.getUint32(1, true);
+        console.log("New Player Id: " + newPlayerId);
         otherPlayers[newPlayerId] = game.add.sprite(0,0,'player');
     }
     else if(packetType == 3) {
