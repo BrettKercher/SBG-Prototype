@@ -60,10 +60,10 @@ Server::Server()
 	mServer.set_close_handler(bind(&Server::OnClose, this, ::_1));
 	mServer.set_message_handler(bind(&Server::OnMessageReceived, this, ::_1, ::_2));
 
-	mServer.clear_access_channels(websocketpp::log::alevel::all);
-	mServer.set_access_channels(websocketpp::log::alevel::connect);
-	mServer.set_access_channels(websocketpp::log::alevel::disconnect);
-	mServer.set_access_channels(websocketpp::log::alevel::app);
+	//mServer.clear_access_channels(websocketpp::log::alevel::all);
+	//mServer.set_access_channels(websocketpp::log::alevel::connect);
+	//mServer.set_access_channels(websocketpp::log::alevel::disconnect);
+	//mServer.set_access_channels(websocketpp::log::alevel::app);
 }
 
 void Server::Run(uint16_t port)
