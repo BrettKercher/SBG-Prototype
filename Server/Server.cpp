@@ -59,6 +59,7 @@ Server::Server()
 	mServer.set_open_handler(bind(&Server::OnOpen, this, ::_1));
 	mServer.set_close_handler(bind(&Server::OnClose, this, ::_1));
 	mServer.set_message_handler(bind(&Server::OnMessageReceived, this, ::_1, ::_2));
+	mServer.set_http_handler(bind(&Server::OnHTTP, this, ::_1));
 
 	//mServer.clear_access_channels(websocketpp::log::alevel::all);
 	//mServer.set_access_channels(websocketpp::log::alevel::connect);
@@ -71,6 +72,17 @@ void Server::Run(uint16_t port)
 	mServer.listen(port);
 	mServer.start_accept();
 	mServer.run();
+}
+
+void Server::OnHTTP(connection_hdl inHandle)
+{
+	WSServer::connection_ptr testCon = mServer.get_con_from_hdl(inHandle);
+
+	std::stringstream output;
+	output << "<!doctype html><html><body>You requested " << testCon->get_resource() << "</body></html>";
+
+	testCon->set_status(websocketpp::http::status_code::ok);
+	testCon->set_body(output.str());
 }
 
 void Server::OnOpen(connection_hdl inHandle)
@@ -127,10 +139,6 @@ void Server::OnMessageReceived(connection_hdl inHandle, WSServer::message_ptr in
 
 void Server::ProcessBinaryMessage(connection_hdl inFromConnection, WSServer::message_ptr inMessage)
 {
-	// Right now there's only one type of binary message - player position
-	// For now just relay it to all other clients, don't worry about security
-
-
 	for (auto player : mPlayers)
 	{
 		if (player.first.lock().get() == inFromConnection.lock().get())

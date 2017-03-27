@@ -31,6 +31,8 @@ class Server
 {
 public:
 	Server();
+
+	void OnHTTP(connection_hdl inHandle);
 	void OnOpen(connection_hdl inHandle);
 	void OnClose(connection_hdl inHandle);
 	void OnMessageReceived(connection_hdl inHandle, WSServer::message_ptr inMessage);
