@@ -61,7 +61,6 @@ void Buffer::WriteShort(uint16_t value)
 
 void Buffer::WriteByte(uint8_t value)
 {
-	std::cout << mIndex << std::endl;
 	assert(mIndex + 1 <= mSize);	//Can't write past the end of the buffer
 
 	*((uint8_t*)(mData + mIndex)) = value;

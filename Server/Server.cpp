@@ -38,10 +38,8 @@ void NewSessionPacket::Read(Buffer& inBuffer)
 
 void PlayerJoinPacket::Write(Buffer& inBuffer)
 {
-	std::cout << "-------writing to join packet" << std::endl;
 	inBuffer.WriteByte(1);
 	inBuffer.WriteInt(playerId);
-	std::cout << "-------finished writing to join packet" << std::endl;
 }
 
 void PlayerJoinPacket::Read(Buffer& inBuffer)
@@ -61,10 +59,10 @@ Server::Server()
 	mServer.set_message_handler(bind(&Server::OnMessageReceived, this, ::_1, ::_2));
 	mServer.set_http_handler(bind(&Server::OnHTTP, this, ::_1));
 
-	//mServer.clear_access_channels(websocketpp::log::alevel::all);
-	//mServer.set_access_channels(websocketpp::log::alevel::connect);
-	//mServer.set_access_channels(websocketpp::log::alevel::disconnect);
-	//mServer.set_access_channels(websocketpp::log::alevel::app);
+	mServer.clear_access_channels(websocketpp::log::alevel::all);
+	mServer.set_access_channels(websocketpp::log::alevel::connect);
+	mServer.set_access_channels(websocketpp::log::alevel::disconnect);
+	mServer.set_access_channels(websocketpp::log::alevel::app);
 }
 
 void Server::Run(uint16_t port)
